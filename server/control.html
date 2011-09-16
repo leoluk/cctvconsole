@@ -44,29 +44,6 @@
             };
         })(jQuery);
 
-        function holdit(btn, action, start, speedup) {
-            var t;
-
-            var repeat = function () {
-                action();
-                t = setTimeout(repeat, start);
-                start = start / speedup;
-            }
-
-            btn.mousedown = function() {
-                repeat();
-            }
-
-            btn.mouseup = function () {
-                clearTimeout(t);
-            }
-
-            btn.mouseout = function () {
-                clearTimeout(t)
-            }
-        }
-        ;
-
         $.ajaxSetup({timeout:1000})
 
         /* function ajaxErrorHandler(xhr, status, error) {
@@ -110,7 +87,38 @@
             $(".spin").find("button").css("width", "75px");
             //$('#switcher').themeswitcher();
 
-            var prefix = false;
+            var prefix = "";
+
+            function sendcmd(cmd) {
+                $.get("control?cmd=" + prefix + cmd);
+            }
+
+            function holdit(btn, action, start, speedup) {
+                var t;
+
+                var repeat = function (cmd) {
+                    sendcmd(cmd);
+
+                    //btn = $(this);
+                    t = setTimeout(function () {
+                        repeat(cmd)
+                    }, start);
+                    start = start / speedup;
+                }
+
+                $(btn).mousedown(function () {
+                    repeat($(this).attr('id'));
+                })
+
+                $(btn).mouseup(function () {
+                    clearTimeout(t);
+                })
+
+                $(btn).mouseout(function () {
+                    clearTimeout(t)
+                })
+            }
+
 
             $("input").change(function () {
                 prefix = ($(this).attr("id") == "dtmf") ? "dtmf-" : "";
@@ -149,12 +157,25 @@
             })
 
             function multitrigger() {
-                        $.get("control?cmd=" + prefix + $(this).attr("id"))
+                sendcmd($(this).attr('id'));
             }
 
-            $("button").mousedown(multitrigger);
+            //$("button").mousedown(multitrigger);
+
+            holdit("button", multitrigger, 500, 1);
+
+            function stopdtmf() {
+                if (prefix == "dtmf-") {
+                    $.get("control?cmd=dtmf-abort");
+                }
+            }
+
+            $("button").mouseup(stopdtmf);
+            $("button").mouseout(stopdtmf);
+
             $("input").click(multitrigger);
-        });
+        })
+
     </script>
 
     <script type="text/javascript"

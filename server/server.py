@@ -80,6 +80,7 @@ DTMFMAPPING = {
     'zoom_m': 'B',
     'focus_p': 'C',
     'focus_m': 'D',
+    'abort': '',
 }
 
 @route("/")
@@ -88,24 +89,28 @@ def main_route():
     return {}
 
 class DTMFThread(threading.Thread):
-    def __init__(self, queue):
+    def __init__(self):
         threading.Thread.__init__(self)
-        self.queue = queue
+        self.queue = Queue.Queue()
         self.device = audiere.open_device()
 
     def run(self):
         while True:
             symbol = self.queue.get()
+            if not symbol: continue
             tones = dtmf.outstreams(self.device, symbol)
             for tone in tones: tone.play()
-            time.sleep(0.5)
+            try:
+                nx = self.queue.get(timeout=0.5)
+                if nx != '': self.queue.put(nx)
+            except Queue.Empty: pass
             for tone in tones: tone.stop()
 
 
 class ControlThread(threading.Thread):
-    def __init__(self, queue):
+    def __init__(self):
         threading.Thread.__init__(self)
-        self.queue = queue
+        self.queue = Queue.Queue()
 
     def run(self):
         while True:
@@ -118,12 +123,10 @@ class ControlThread(threading.Thread):
                 print "CamServer socket crashed, reconnecting..."
 
 
-queue = Queue.Queue()
-control = ControlThread(queue)
+control = ControlThread()
 control.start()
 
-dtmfqueue = Queue.Queue()
-dtmfcontrol = DTMFThread(dtmfqueue)
+dtmfcontrol = DTMFThread()
 dtmfcontrol.start()
 
 @route("/control")
@@ -132,9 +135,9 @@ def control_route():
         cmd = request.GET["cmd"]
 
         if not cmd.startswith("dtmf-"):
-            queue.put(MAPPING[cmd])
+            control.queue.put(MAPPING[cmd])
         else:
-            dtmfqueue.put(DTMFMAPPING[cmd.lstrip('dtmf')[1:]])
+            dtmfcontrol.queue.put(DTMFMAPPING[cmd.lstrip('dtmf')[1:]])
 
     except KeyError:
         bottle.abort(400, "Invalid command.")
