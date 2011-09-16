@@ -1,0 +1,241 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>DK0FR Camera Control</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link href="static/bootstrap-1.2.0.min.css" rel="stylesheet"/>
+    <link href="static/jquery-ui-1.8.16.custom.css" rel="stylesheet"/>
+    <!--<link type="text/css" rel="stylesheet" href="http://jqueryui.com/themes/base/ui.all.css"/>-->
+    <script type="text/javascript" src="static/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="static/jquery-ui-1.8.16.custom.min.js"></script>
+
+    <script type="text/javascript">
+        (function($) {
+            $.fn.alignv = function() {
+                $(this).css("float", "left");
+                $(this).css("clear", "left");
+            };
+            $.fn.buttonsetv = function() {
+                // $(':radio, :checkbox', this).wrap('<div style="margin: 1px"/>');
+                $(this).buttonset();
+                $(this).find(":button, :radio, :checkbox").alignv();
+                $('(:button, :label):first', this).removeClass('ui-corner-left').addClass('ui-corner-top')
+                        .next().removeClass('ui-corner-right').addClass('ui-corner-bottom');
+                mw = 0; // max witdh
+                $('button', this).each(function(index) {
+                    w = $(this).width();
+                    if (w > mw) mw = w;
+                })
+                $('button', this).each(function(index) {
+                    $(this).width(mw);
+                })
+            };
+        })(jQuery);
+
+        function holdit(btn, action, start, speedup) {
+            var t;
+
+            var repeat = function () {
+                action();
+                t = setTimeout(repeat, start);
+                start = start / speedup;
+            }
+
+            btn.mousedown = function() {
+                repeat();
+            }
+
+            btn.mouseup = function () {
+                clearTimeout(t);
+            }
+
+            btn.mouseout = function () {
+                clearTimeout(t)
+            }
+        }
+        ;
+
+        $.ajaxSetup({timeout:1000})
+
+        /* function ajaxErrorHandler(xhr, status, error) {
+         switch (status) {
+         case 'error':
+         switch (xhr.status) {
+         case 401:
+         alert('HTTP ' + xhr.status + 'Error\n' + xhr.responseText);
+         break;
+         case 404:
+         alert('HTTP ' + xhr.status + 'Error\n' + xhr.responseText);
+         break;
+         case 500:
+         alert('HTTP ' + xhr.status + xhr.responseText);
+         break;
+         default:
+         alert('HTTP ' + xhr.status + 'Error\n' + xhr.responseText);
+         break;
+         }
+         break;
+         case 'timeout':
+         alert('Timeout. The server was taking too long to respond. Please try again in a few moments.');
+         break;
+         case 'parsererror':
+         alert('Error.\nCould Not Process Server Response.');
+         break;
+         default:
+         alert('Unexpected HTTP Error.\n' + xhr.responseText);
+         break;
+         }
+         } */
+
+
+        $(function() {
+            $(".spin").buttonset();
+            $(".spinm").buttonset();
+            $("#radio").buttonset();
+            $("#radio").find("label").css("width", "78px");
+            $('#cam4').next().css("width", "79px");
+            $(".spinv").buttonsetv();
+            $(".spin").find("button").css("width", "75px");
+            //$('#switcher').themeswitcher();
+
+            $('#up').button({
+                text: false,
+                icons: {
+                    primary: "ui-icon-arrowthick-1-n"
+                }
+            })
+            $('#down').button({
+                text: false,
+                icons: {
+                    primary: "ui-icon-arrowthick-1-s"
+                }
+            })
+            $('#left').button({
+                text: false,
+                icons: {
+                    primary: "ui-icon-arrowthick-1-w"
+                }
+            })
+            $('#right').button({
+                text: false,
+                icons: {
+                    primary: "ui-icon-arrowthick-1-e"
+                }
+            })
+
+            $("button, input").click(
+                    function () {
+                        $.get("control?cmd=" + $(this).attr("id"))
+                    }
+            )
+
+
+        });
+    </script>
+
+    <script type="text/javascript"
+            src="http://jqueryui.com/themeroller/themeswitchertool/">
+    </script>
+
+    <style type="text/css">
+        .ui-buttonset {
+            margin-bottom: 5px;
+        }
+
+            /*.ui-buttonset .ui-button {
+                float: left;
+                clear: left;
+            }*/
+
+        .spin {
+            /* width: 50px;*/
+        }
+    </style>
+</head>
+<body>
+<div style="padding:0 10px;">
+    <div class="container-fluid" style="margin-top: 10px;">
+        <div class="page-header">
+            <h1>DK0FR Camera Control</h1>
+        </div>
+
+        <div class="row">
+            <div class="span6 columns" style="position: relative;left: 8px;top: 10px;">
+                <form>
+                    <div id="radio">
+                        <input type="radio" id="cam1" name="radio"/><label for="cam1">Cam 1</label>
+                        <input type="radio" id="cam2" name="radio"/><label for="cam2">Cam 2</label>
+                        <input type="radio" id="cam3" name="radio"/><label for="cam3">Cam 3</label>
+                        <input type="radio" id="cam4" name="radio"/><label for="cam4">Cam 4</label>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="span3 columns" style="position: relative; left: 65px; top: 5px;">
+                <div class="spinv">
+                    <button id="up" style="top: -2px;">U</button>
+                    <button id="down" style="top: 29px; ">D</button>
+                </div>
+                <div class="spinm">
+                    <button style="top: 25px;left: -68px;" id="left">L</button>
+                    <button style="left: -30px;top: 25px" id="right">R</button>
+                </div>
+            </div>
+
+            <div class="span3 columns" style="font-size: 88%; position: relative; left: -13px;">
+                <div class="spin">
+                    <button id="zoom_p">Zoom +</button>
+                    <button id="zoom_m">Zoom –</button>
+                </div>
+                <div class="spin">
+                    <button id="iris_p">Iris +</button>
+                    <button id="iris_m">Iris –</button>
+                </div>
+                <div class="spin">
+                    <button id="focus_p">Focus +</button>
+                    <button id="focus_m">Focus –</button>
+                </div>
+                <div class="spin">
+                    <button id="set">Set</button>
+                    <button id="hud">HUD</button>
+                </div>
+                <div class="spin">
+                    <button id="preset">Preset</button>
+                    <button id="setpreset">← Set</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="span3 columns" style="position: relative;left: 9px;top: -89px;">
+                <div class="spin">
+                    <button id="menu">Menu</button>
+                    <button id="enter">OK</button>
+                </div>
+                <div class="spin">
+                    <button id="display">Display</button>
+                    <button id="cancel">Exit</button>
+                </div>
+            </div>
+        </div>
+
+        <!--<div class="row">
+            <div class="span6 columns">
+                <div class="alert-message error"><a class="close" href="#">×</a> went wrong!</div>
+            </div>
+        </div>-->
+
+    </div>
+
+	<!--
+    <div id="footer">
+        <div id="switcher"></div>
+    </div>
+	-->
+</div>
+</body>
+</html>
