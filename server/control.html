@@ -93,11 +93,23 @@
             $(".spin").buttonset();
             $(".spinm").buttonset();
             $("#radio").buttonset();
-            $("#radio").find("label").css("width", "78px");
-            $('#cam4').next().css("width", "79px");
+            $("#radio").find("label").css("width", "63px");
+            //$('#cam4').next().css("width", "79px");
             $(".spinv").buttonsetv();
             $(".spin").find("button").css("width", "75px");
             //$('#switcher').themeswitcher();
+
+            var prefix = false;
+
+            $("input").change(function () {
+                prefix = ($(this).attr("id") == "dtmf") ? "dtmf-" : "";
+
+                /*if ($(this).attr("id") == "dtmf") {
+                    $(".spin").button("disable");
+                } else {
+                    $(".spin").button("enable");
+                }*/
+            })
 
             $('#up').button({
                 text: false,
@@ -126,7 +138,7 @@
 
             $("button, input").click(
                     function () {
-                        $.get("control?cmd=" + $(this).attr("id"))
+                        $.get("control?cmd=" + prefix + $(this).attr("id"))
                     }
             )
 
@@ -164,10 +176,11 @@
             <div class="span6 columns" style="position: relative;left: 8px;top: 10px;">
                 <form>
                     <div id="radio">
-                        <input type="radio" id="cam1" name="radio"/><label for="cam1">Cam 1</label>
-                        <input type="radio" id="cam2" name="radio"/><label for="cam2">Cam 2</label>
-                        <input type="radio" id="cam3" name="radio"/><label for="cam3">Cam 3</label>
-                        <input type="radio" id="cam4" name="radio"/><label for="cam4">Cam 4</label>
+                        <input type="radio" id="cam1" name="radio"/><label for="cam1">C1</label>
+                        <input type="radio" id="cam2" name="radio"/><label for="cam2">C2</label>
+                        <input type="radio" id="cam3" name="radio"/><label for="cam3">C3</label>
+                        <input type="radio" id="cam4" name="radio"/><label for="cam4">C4</label>
+                        <input type="radio" id="dtmf" name="radio"/><label for="dtmf">DTMF</label>
                     </div>
                 </form>
             </div>

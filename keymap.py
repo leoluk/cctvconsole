@@ -49,7 +49,7 @@ KEY_MAPPING = {
 
 # Num keys can be accessed as N_1, N_2, N_3, ...
 
-KEY_MAPPING += {("N_%d" % num): num-1 for num in range(1,17)}
+KEY_MAPPING.update({("N_%d" % num): num-1 for num in range(1,17)})
 
 KEY_MAPPING_INVERTED = dict((v,k) for k,v in KEY_MAPPING.items())
 
