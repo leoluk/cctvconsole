@@ -96,14 +96,21 @@ class DTMFThread(threading.Thread):
 
     def run(self):
         while True:
+            # HORRIBLE SPAGHETTI CODE - BEWARE!
+            # TODO: Proper implementation here!
+            
             symbol = self.queue.get()
+            self.queue.empty()
             if not symbol: continue
             tones = dtmf.outstreams(self.device, symbol)
             for tone in tones: tone.play()
-            try:
-                nx = self.queue.get(timeout=0.5)
-                if nx != '': self.queue.put(nx)
-            except Queue.Empty: pass
+            while True:
+                try:
+                    nx = self.queue.get(timeout=0.5)
+                    if nx == symbol: continue
+                    if nx != '': self.queue.put(nx)
+                    break
+                except Queue.Empty: pass
             for tone in tones: tone.stop()
 
 
@@ -118,9 +125,11 @@ class ControlThread(threading.Thread):
                 control = core.ControlSocket(*REMOTE)
                 while True:
                     cmd = self.queue.get()
+                    self.queue.empty()  # TODO: Good idea?
                     control.sendKey(cmd)
             except socket.error:
                 print "CamServer socket crashed, reconnecting..."
+                time.sleep(1)
 
 
 control = ControlThread()
