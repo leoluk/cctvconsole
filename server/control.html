@@ -148,13 +148,12 @@
                 }
             })
 
-            $("button, input").mousedown(
-                    function () {
+            function multitrigger() {
                         $.get("control?cmd=" + prefix + $(this).attr("id"))
-                    }
-            )
+            }
 
-
+            $("button").mousedown(multitrigger);
+            $("input").click(multitrigger);
         });
     </script>
 
