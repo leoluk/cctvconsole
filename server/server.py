@@ -134,7 +134,7 @@ def control_route():
         if not cmd.startswith("dtmf-"):
             queue.put(MAPPING[cmd])
         else:
-            dtmfqueue.put(DTMFMAPPING[cmd.lstrip('dtmf-')])
+            dtmfqueue.put(DTMFMAPPING[cmd.lstrip('dtmf')[1:]])
 
     except KeyError:
         bottle.abort(400, "Invalid command.")
