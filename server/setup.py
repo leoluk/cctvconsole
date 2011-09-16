@@ -12,7 +12,7 @@ setup(
             "ascii": 1,
             "bundle_files": 1,
             "dll_excludes": excludes,
-            "packages": ["encodings", "core", "email"],
+            "packages": ["encodings", "core", "email", "numpy"],
             "dist_dir": "dist",
             }
         },

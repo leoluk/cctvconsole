@@ -116,7 +116,7 @@ class DTMFThread(threading.Thread):
                     if nx == symbol: continue
                     if nx != '': self.queue.put(nx)
                     break
-                except Queue.Empty: pass
+                except Queue.Empty: break
             for tone in tones: tone.stop()
 
 
