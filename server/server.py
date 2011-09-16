@@ -1,11 +1,16 @@
 import os
 import sys
-import bottle
 import socket
 import ConfigParser
-
 import Queue
 import threading
+import time
+
+import bottle
+import audiere
+
+import dtmf
+
 
 if not "frozen" in dir(sys):
     sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
@@ -54,10 +59,36 @@ MAPPING = {
     'preset': 'F_GOTO_PRESET',
 }
 
+DTMFMAPPING = {
+    'up': '2',
+    'left': '4',
+    'right': '6',
+    'down': '8',
+    'zoom_p': 'A',
+    'zoom_m': 'B',
+    'focus_p': 'C',
+    'focus_m': 'D',
+}
+
 @route("/")
 @view('control.html')
 def main_route():
     return {}
+
+class DTMFThread(threading.Thread):
+    def __init__(self, queue):
+        threading.Thread.__init__(self)
+        self.queue = queue
+        self.device = audiere.open_device()
+
+    def run(self):
+        while True:
+            symbol = self.queue.get()
+            tones = dtmf.outstreams(self.device, symbol)
+            for tone in tones: tone.play()
+            time.sleep(0.5)
+            for tone in tones: tone.stop()
+
 
 class ControlThread(threading.Thread):
     def __init__(self, queue):
@@ -74,21 +105,27 @@ class ControlThread(threading.Thread):
             except socket.error:
                 print "CamServer socket crashed, reconnecting..."
 
+                
 queue = Queue.Queue()
 control = ControlThread(queue)
 control.start()
 
+dtmfqueue = Queue.Queue()
+dtmfcontrol = DTMFThread(dtmfqueue)
+dtmfcontrol.start()
+
 @route("/control")
 def control_route():
     try:
-        cmd = (MAPPING[request.GET["cmd"]])
+        cmd = request.GET["cmd"]
+
+        if not cmd.startswith("dtmf-"):
+            queue.put(MAPPING[cmd])
+        else:
+            dtmfqueue.put(DTMFMAPPING[cmd.lstrip('dtmf-')])
+
     except KeyError:
         bottle.abort(400, "Invalid command.")
-
-    #try:
-    queue.put(cmd)
-    #except socket.error:
-    #    bottle.abort(500, "Camera control server unreachable")
 
 @route("/static/:path#.+#")
 def static_route(path):

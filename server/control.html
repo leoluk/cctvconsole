@@ -136,7 +136,7 @@
                 }
             })
 
-            $("button, input").click(
+            $("button, input").mousedown(
                     function () {
                         $.get("control?cmd=" + prefix + $(this).attr("id"))
                     }
