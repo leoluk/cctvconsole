@@ -32,7 +32,8 @@ from bottle import route, view, request
 
 socket.setdefaulttimeout(0.5)
 
-parser = ConfigParser.ConfigParser(dict(remote_ip='192.168.1.254', remote_port='1024', debug='0', server_port='8080'))
+parser = ConfigParser.ConfigParser(dict(remote_ip='192.168.1.254', remote_port='1024', debug='0', server_port='8080',
+                                        callsign='0'))
 parser.read("settings.ini")
 
 if not parser.has_section("Server"):
@@ -89,20 +90,25 @@ def main_route():
     return {}
 
 class DTMFThread(threading.Thread):
-    def __init__(self):
+    def __init__(self, callsign=None):
         threading.Thread.__init__(self)
         self.queue = Queue.Queue()
         self.device = audiere.open_device()
+        self.callsign = callsign
 
     def run(self):
         while True:
             # HORRIBLE SPAGHETTI CODE - BEWARE!
             # TODO: Proper implementation here!
-            
+
             symbol = self.queue.get()
             self.queue.empty()
             if not symbol: continue
             tones = dtmf.outstreams(self.device, symbol)
+            if self.callsign:
+                if self.callsign.stream.playing:
+                    self.callsign.stream.stop()
+                    time.sleep(0.1)
             for tone in tones: tone.play()
             while True:
                 try:
@@ -131,11 +137,27 @@ class ControlThread(threading.Thread):
                 print "CamServer socket crashed, reconnecting..."
                 time.sleep(1)
 
+class CallsignThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.device = audiere.open_device()
+        self.stream = self.device.open_file("call.wav")
+
+    def run(self):
+        while True:
+            self.stream.play()
+            time.sleep(10*60)
+
+
+callthread = CallsignThread()
+
+if parser.getboolean("Server", "callsign"):
+    callthread.start()
 
 control = ControlThread()
 control.start()
 
-dtmfcontrol = DTMFThread()
+dtmfcontrol = DTMFThread(callthread)
 dtmfcontrol.start()
 
 @route("/control")
