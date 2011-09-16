@@ -11,7 +11,6 @@
 #   mail@leoschabel.de
 #
 -->
-
 <html>
 <head>
     <title>DK0FR Camera Control</title>
@@ -116,11 +115,12 @@
             $("input").change(function () {
                 prefix = ($(this).attr("id") == "dtmf") ? "dtmf-" : "";
 
-                /*if ($(this).attr("id") == "dtmf") {
-                    $(".spin").button("disable");
+                if ($(this).attr("id") == "dtmf") {
+                    $('.spin button').button('disable');
+		    $('#zoom_p,#zoom_m,#focus_p,#focus_m').button('enable');
                 } else {
-                    $(".spin").button("enable");
-                }*/
+                    $('.spin button').button('enable');
+                }
             })
 
             $('#up').button({
