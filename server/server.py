@@ -1,3 +1,15 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+#   Copyright (c) 2011 Leopold Schabel
+#   All rights reserved.
+#
+#   This copyright notice MUST APPEAR in all copies of the script!
+#   In case of abuse or illegal redistribution please contact me:
+#   mail@leoschabel.de
+#
+
+
 import os
 import sys
 import socket
@@ -105,7 +117,7 @@ class ControlThread(threading.Thread):
             except socket.error:
                 print "CamServer socket crashed, reconnecting..."
 
-                
+
 queue = Queue.Queue()
 control = ControlThread(queue)
 control.start()

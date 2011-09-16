@@ -1,3 +1,15 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+#   Copyright (c) 2011 Leopold Schabel
+#   All rights reserved.
+#
+#   This copyright notice MUST APPEAR in all copies of the script!
+#   In case of abuse or illegal redistribution please contact me:
+#   mail@leoschabel.de
+#
+
+
 import audiere
 
 KEYS = ('1', '2', '3', 'A',
