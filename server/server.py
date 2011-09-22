@@ -99,6 +99,7 @@ class DTMFThread(threading.Thread):
     def run(self):
         while True:
             # HORRIBLE SPAGHETTI CODE - BEWARE!
+			# DO NOT TOUCH!
             # TODO: Proper implementation here!
 
             symbol = self.queue.get()
@@ -112,7 +113,7 @@ class DTMFThread(threading.Thread):
             for tone in tones: tone.play()
             while True:
                 try:
-                    nx = self.queue.get(timeout=0.5)
+                    nx = self.queue.get(timeout=0.8)
                     if nx == symbol: continue
                     if nx != '': self.queue.put(nx)
                     break

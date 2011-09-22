@@ -23,9 +23,10 @@ class ControlSocket(socket.socket):
         socket.socket.__init__(self, socket.AF_INET, socket.SOCK_STREAM)
         self.connect((host, port,))
 
-    def sendKeyByte(self, byte):
+    def sendKeyByte(self, byte, terminate=True):
         self.send(getTemplateByByte(byte))
-        self.send(getTemplateByName("C_ACK"))
+        if terminate:
+            self.send(getTemplateByName("C_ACK"))
 
     def sendKey(self, name):
         self.sendKeyByte(keymap.getKeyByte(name))
