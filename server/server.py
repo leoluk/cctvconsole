@@ -21,25 +21,24 @@ import time
 import bottle
 import audiere
 
-import dtmf
-
-
-if not "frozen" in dir(sys):
-    sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
-
-import core
 from bottle import route, view, request
+from ..dtmf import tonegen as dtmf
+from ..nvv import core
 
 socket.setdefaulttimeout(0.5)
 
-parser = ConfigParser.ConfigParser(dict(remote_ip='192.168.1.254', remote_port='1024', debug='0', server_port='8080',
-                                        callsign='0'))
-parser.read("settings.ini")
+parser = ConfigParser.ConfigParser(dict(remote_ip='192.168.1.254',
+                                        remote_port='1024', debug='0',
+                                        server_port='8080', callsign='0'))
+
+parser.read(["settings.ini", os.path.join(os.path.dirname(__file__), 'settings.ini')])
 
 if not parser.has_section("Server"):
     parser.add_section("Server")
 
 bottle.debug(parser.getboolean('Server', 'debug'))
+
+CALL_FILE = os.path.join(os.path.dirname(__file__), 'call.wav')
 
 REMOTE = (parser.get('Server', 'remote_ip'),
           parser.getint('Server', 'remote_port'))
@@ -142,13 +141,12 @@ class CallsignThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         self.device = audiere.open_device()
-        self.stream = self.device.open_file("call.wav")
+        self.stream = self.device.open_file(CALL_FILE)
 
     def run(self):
         while True:
             self.stream.play()
             time.sleep(10*60)
-
 
 callthread = CallsignThread()
 
@@ -178,5 +176,6 @@ def control_route():
 def static_route(path):
     return bottle.static_file(path, root=os.path.join(os.path.dirname(sys.argv[0]), 'static'), download=None)
 
-bottle.TEMPLATE_PATH = os.path.dirname(sys.argv[0])
-bottle.run(reloader=bottle.DEBUG, port=parser.getint('Server', 'server_port'), server="paste", host="0.0.0.0")
+def main():
+    bottle.TEMPLATE_PATH = os.path.dirname(sys.argv[0])
+    bottle.run(reloader=bottle.DEBUG, port=parser.getint('Server', 'server_port'), server="paste", host="0.0.0.0")

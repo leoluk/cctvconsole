@@ -4,6 +4,8 @@ from distutils.core import setup
 import py2exe
 import py_compile
 excludes = ["Secur32.dll", "SHFOLDER.dll"]
+
+run = lambda: \
 setup(
     options = {
         "py2exe": {
@@ -18,8 +20,12 @@ setup(
         },
     zipfile = None,
     console=[{
-        'script': "server.py",
+        'script': "server/server.py",
       #  "icon_resources": [(1, 'skype.ico')]
     }]
     )
 
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        sys.argv[1:] = ['py2exe']
+    run()
